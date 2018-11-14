@@ -23,6 +23,7 @@ int thresh = 140;
 int max_thresh = 255;
 RNG rng(12345);
 int nbGraine=0;
+int nccomps=0;
  
 void thresh_callback(int, void*,Mat src)//Find contours
 {
@@ -49,16 +50,62 @@ void thresh_callback(int, void*,Mat src)//Find contours
   imshow( "Contours", drawing );
 }
 
+
+
 Mat find_moments( Mat gray )	//Find centroid
 {
     Mat canny_output;
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
+    Mat labels, centroids, img_color, stats;
+    
+    int i;
+    nccomps = cv::connectedComponentsWithStats (// Find # of blob
+		gray, 
+		labels,
+		stats, 
+		centroids
+	);
+
+	
+	vector<cv::Vec3b> colors(nccomps+1);// Define vector of blob size
+	colors[0] = cv::Vec3b(0,0,0); // background pixels remain black.
+	for( i = 1; i <= nccomps; i++ ) {	//Assign color in function of Area size of blob
+		//colors[i] = cv::Vec3b(rand()%256, rand()%256, rand()%256);
+		if( stats.at<int>(i, cv::CC_STAT_AREA) < 1250 ) colors[i] = cv::Vec3b(0,0,255);	//Soybeans in red
+		else colors[i] = cv::Vec3b(0,255,0);
+    
+		if( stats.at<int>(i, cv::CC_STAT_AREA) < 100 ) colors[i] = cv::Vec3b(0,0,0); // small regions are painted with black too.
+    
+    
+		//cout << "surface : " << stats.at<int>(i, cv::CC_STAT_AREA)<< "  couleur : " << colors[i] << endl;
+	}
+	
+	//img_color = cv::Mat::zeros(gray.size(), CV_8UC3);	//Define a blank image
+
+		
+
+		
+		
+	
+	
+	
+	
+	
+	
+	
+	
+	
  
     /// Detect edges using canny
     Canny( gray, canny_output, 50, 150, 3 );
+    
+    //namedWindow( "Debug Window", WINDOW_AUTOSIZE );
+    //imshow( "Debug Window", canny_output);
     // Find contours
     findContours( canny_output, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
+ 
+ 
  
     /// Get the moments
     vector<Moments> mu(contours.size() );
@@ -70,21 +117,49 @@ Mat find_moments( Mat gray )	//Find centroid
     for( int i = 0; i < contours.size(); i++ )
     { mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 ); }
     
+    
+    //Find smaller area for soy
+    
+    
+    
+    
+
+    
  
     /// Draw contours
-    
     Mat drawing(canny_output.size(), CV_8UC3, Scalar(255,255,255));
+    
+    
+    
+	for( int y = 0; y < drawing.rows; y++ )
+		for( int x = 0; x < drawing.cols; x++ ){
+			int label = labels.at<int>(y, x);
+			CV_Assert(0 <= label && label <= nccomps);
+			drawing.at<cv::Vec3b>(y, x) = colors[label];
+		}
+
+    
+    
+    
 
     for( int i = 0; i< contours.size(); i++ )
     {
         Scalar color = Scalar(167,151,0);
         drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
-        circle( drawing, mc[i], 4, Scalar(0,0,255), -1, 7, 0 );
+        circle( drawing, mc[i], 4, Scalar(255,0,0), -1, 7, 0 );
     }
+    
+
  
     /// Show the resultant image
+    //namedWindow( "Debug Window", WINDOW_AUTOSIZE );
+    //imshow( "Debug Window", drawing );
     //namedWindow( "Contours", WINDOW_AUTOSIZE );
     //imshow( "Contours", drawing );
+    //namedWindow( "Contours", WINDOW_AUTOSIZE );
+    //imshow( "Contours", drawing );
+    
+    
     return drawing;
     
 		
@@ -98,6 +173,7 @@ int main()
     //! [mat]
     Mat frame, frame_morph, frame_gray, frame_threshold, frame_label;
     Mat element = getStructuringElement( MORPH_RECT, Size( 6, 6 ), Point(-1,-1) );
+    Mat img, img_edge, labels, centroids, img_color, stats;
     
     //! [cap]
     VideoCapture cap(0);
@@ -111,7 +187,7 @@ int main()
  
     
     //! [window]
-    namedWindow("Video Capture", WINDOW_AUTOSIZE);
+    //namedWindow("Video Capture", WINDOW_AUTOSIZE);
     namedWindow("Centroid Detection", WINDOW_AUTOSIZE);
     //namedWindow("Object Detection", WINDOW_NORMAL);
 
@@ -135,9 +211,12 @@ int main()
         
         
         //-- [show]
-        imshow("Video Capture",frame);
-        imshow("Centroid Detection",frame_label);
-        //imshow("ThreShold Result after noise filtering",frame_morph);        
+       imshow("Video Capture",frame);
+       imshow("Centroid Detection",frame_label);
+       if(nccomps != nbGraine){
+		    cout << "Voici le nombre de graine : " << nccomps << endl;
+			nbGraine=nccomps;
+        }//imshow("ThreShold Result after noise filtering",frame_morph);        
         //video.write(frame);
         //video1.write(frame_label);
     }
