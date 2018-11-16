@@ -96,11 +96,11 @@ Mat find_moments( Mat gray )	/// Find centroid
 
 
 /** @function main */
-int main()
+int main(int argv, char* argc[])
 {
     //! [mat]
     Mat frame, frame_morph, frame_gray, frame_threshold, frame_label;
-    Mat element = getStructuringElement( MORPH_RECT, Size( 6, 6 ), Point(-1,-1) );
+    Mat element = getStructuringElement( MORPH_RECT, Size( 14, 14 ), Point(-1,-1) );// Size(6,6) marche mais on a un probleme avec le glare
     Mat img, img_edge, labels, centroids, img_color, stats;
     
     //! [cap]
@@ -109,11 +109,11 @@ int main()
     cap.set(CV_CAP_PROP_FRAME_HEIGHT,600);	//768
     //VideoWriter video1("source.avi",CV_FOURCC('M','J','P','G'),10, Size(800,600));
     //VideoWriter video("centroids.avi",CV_FOURCC('M','J','P','G'),2, Size(800,600));
-       
+     
     //! [window]
     //namedWindow("Video Capture", WINDOW_AUTOSIZE);
     namedWindow("Centroid Detection", WINDOW_AUTOSIZE);
-    //namedWindow("Object Detection", WINDOW_NORMAL);
+    namedWindow("Object Detection", WINDOW_AUTOSIZE);
 	struct timespec start, end;	// initiate start and ends values of clock
 	clock_gettime(CLOCK_REALTIME, &start); //starts clock
 	uint32_t nbLoop=0;
@@ -130,14 +130,14 @@ int main()
         
 
        if(nccomps != nbGraine){	//check if a theres a change in # of seeds in the frame and tell how many there is
-		    cout << "Voici le nombre de graine : " << nccomps << endl;
+		    cout << "Voici le nombre de graine : " << nccomps-1 << endl;	//remove background, returns number of seed detected
 			nbGraine=nccomps;
         }
         
         //-- [show]
 		//imshow("Video Capture",frame);
-		//imshow("Centroid Detection",frame_label);
-        //imshow("ThreShold Result after noise filtering",frame_morph);        
+		imshow("Centroid Detection",frame_label);
+        //imshow("Object Detection",frame_morph);        
         //video.write(frame);
         //video1.write(frame_label);
         nbLoop++;
@@ -146,8 +146,11 @@ int main()
     double difference = (end.tv_sec -start.tv_sec) + (double)(end.tv_nsec - start.tv_nsec)/1000000000.0;
     cout << "Ca prend " << difference << "secondes pour faire " << nbLoop << " capture dimage et traitement" << endl;
     cout << "Moyenne de : " << nbLoop/difference << " capture&traitement/secondes " << endl; 
-    //imwrite("tresholdedimage.jpg",frame_threshold);
-    //imwrite("Centroids.jpg",frame_morph); 
+    imwrite("otsu_thresholding.jpg",frame_threshold);
+    imwrite("sorted_seeds.jpg",frame_label); 
+    imwrite("noise_filtered.jpg",frame_morph); 
+    imwrite("gray_scaled.jpg",frame_gray);
+    imwrite("original_frame.jpg",frame);  
     //video.release();
     //video1.release();
     cap.release();
