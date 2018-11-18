@@ -1,5 +1,9 @@
 Seed sorter Project
 ===============
+Example of current state of the Project 
+```bash 
+	https://www.youtube.com/watch?v=l2LMlc-uq7o
+	```
 
 To compile this project, you need openCV-3.2 for raspberry pi 3
 1. Follow this guide by Pklab
