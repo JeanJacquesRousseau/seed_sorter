@@ -7,7 +7,9 @@ Author : David Patry
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
-
+#include "seed.h"
+#include <wiringPi.h>
+#include <stdio.h>
 using namespace std;
 using namespace cv;
 
@@ -20,11 +22,18 @@ RNG rng(12345);
 uint32_t nbGraine=0;
 uint32_t nccomps=0;
 
+
+
 /**
  * @function thresh_callback
  */
- 
-Mat find_moments( Mat gray )	/// Find centroid
+//vector<Seed> seeds();
+
+vector<Point2f> center;
+vector<Point3f> seeds;
+
+
+vector<Point3f> seedIdentifier(Mat gray)	/// Find centroid
 {	
 	uint32_t i;
     Mat canny_output, labels, centroids, img_color, stats;
@@ -39,38 +48,62 @@ Mat find_moments( Mat gray )	/// Find centroid
 		stats, 
 		centroids
 	);
-
-	vector<cv::Vec3b> colors(nccomps+1);	/// Define vector of Vec3b # of blob size
-	colors[0] = cv::Vec3b(0,0,0);	/// background pixels remain black.
 	
-	for( i = 1; i <= nccomps; i++ ) {	///Assign color in function of Area size of blob
-		
-		if( stats.at<int>(i, cv::CC_STAT_AREA) < 1250 ) colors[i] = cv::Vec3b(0,0,255);	///Soybeans in red
-		else colors[i] = cv::Vec3b(0,255,0);	///Corn in green
-    
-		//if( stats.at<int>(i, cv::CC_STAT_AREA) < 100 ) colors[i] = cv::Vec3b(0,0,0); // small regions are painted with black, looks useless for now. 
-		//cout << "surface : " << stats.at<int>(i, cv::CC_STAT_AREA)<< "  couleur : " << colors[i] << endl;	//debug message
-		//colors[i] = cv::Vec3b(rand()%256, rand()%256, rand()%256); //Random color attribution exemple
-	}
-	
-	
-	/// Detect edges using canny
+		/// Detect edges using canny
     Canny( gray, canny_output, 50, 150, 3 ); 
     
     /// Find contours
     findContours( canny_output, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0)); 
- 
+	
+	
+	vector<cv::Vec3b> colors(nccomps);	/// Define vector of Vec3b # of blob size
+	vector<Point3f> graines(nccomps-1);
+	
+	colors[0] = cv::Vec3b(0,0,0);	/// background pixels remain black.
+	
+	for( i = 1; i < nccomps; i++ ) {	///Assign color in function of Area size of blob
+	
+		if( stats.at<int>(i, cv::CC_STAT_AREA) < 1250 ) {
+			colors[i] = cv::Vec3b(0,0,255);	///Soybeans in red
+			graines[i-1] = Point3f(0,0,1);
+		}
+		else {
+			colors[i] = cv::Vec3b(0,255,0);	///Corn in green
+			graines[i-1] = Point3f(0,0,2);
+		}
+	}
+	
     /// Get the moments
     vector<Moments> mu(contours.size() );
+    //Set number of seed here
+    
     for(uint32_t i = 0; i < contours.size(); i++ ){
 		 mu[i] = moments(contours[i], false);
 	}
  
     ///  Get the centroid of figures.
     vector<Point2f> mc(contours.size());
-    for(uint32_t i = 0; i < contours.size(); i++ ){
+    
+    //Seed seed;
+    for(uint32_t i = 0; i < contours.size(); i++ ){	//
 		mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 );
+	
+	}	
+	vector<Point2f> transfer(contours.size());
+	for(uint32_t j = contours.size(); j > 0; j--)	//flips mcs tails and head ist into transfer
+	{
+		transfer[contours.size()-j]=mc[j];
 	}
+	
+	
+	for(uint32_t k = 0; k < nccomps-1; k++ )	//transfer list has repeating values and value 0 is corrupted.
+	{											//So I extract non-trivial list into graines
+				graines[k].x = transfer[2*k+1].x;
+				graines[k].y = transfer[2*k+1].y;
+	}
+	
+
+	
     
   
     /// Draw contours
@@ -89,8 +122,37 @@ Mat find_moments( Mat gray )	/// Find centroid
         drawContours(drawing, contours, i, color, 2, 8, hierarchy, 0, Point());
         circle(drawing, mc[i], 4, Scalar(255,0,0), -1, 7, 0);
     }
+	Rect r = Rect(0,200, 250,200);
+	rectangle(drawing,r,Scalar(200,150,25),1,8,0);
+    //return drawing;   	
+    namedWindow( "Debug Window", WINDOW_AUTOSIZE );
+    imshow( "Debug Window", drawing);
+    //return transfer;
+    return graines;
+}
 
-    return drawing;   	
+
+void sort(vector<Point3f> input)
+{
+	
+	for (uint32_t i = 0; i <(int)input.size();i++)
+	{
+		if( (input[i].x >=0 && input[i].x <= 250) && (input[i].y >= 200 && input[i].y <= 400) ){
+		
+			cout << " ya une graine ";
+			char* couleur;
+			if(input[i].z ==2) couleur = "verte ";
+			if(input[i].z ==1 ) couleur = "rouge ";
+			
+			
+		
+			cout << couleur << "dans slot" << endl;
+			
+			
+		}
+	}
+
+	
 }
 
 
@@ -105,10 +167,8 @@ int main(int argv, char* argc[])
     
     //! [cap]
     VideoCapture cap(0);
-    cap.set(CV_CAP_PROP_FRAME_WIDTH,800);	//1024
-    cap.set(CV_CAP_PROP_FRAME_HEIGHT,600);	//768
-    //VideoWriter video1("source.avi",CV_FOURCC('M','J','P','G'),10, Size(800,600));
-    //VideoWriter video("centroids.avi",CV_FOURCC('M','J','P','G'),2, Size(800,600));
+    cap.set(CV_CAP_PROP_FRAME_WIDTH,WIDTH);	//1024
+    cap.set(CV_CAP_PROP_FRAME_HEIGHT,HEIGHT);	//768
      
     //! [window]
     //namedWindow("Video Capture", WINDOW_AUTOSIZE);
@@ -126,20 +186,26 @@ int main(int argv, char* argc[])
         cvtColor( frame, frame_gray, COLOR_BGR2GRAY );	//Grey scale convertion
         threshold(frame_gray, frame_threshold, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);  //Otsu thresholding
         morphologyEx(frame_threshold, frame_morph, MORPH_OPEN , element);	// Noise filter
-		frame_label = find_moments( frame_morph);	// Contours/Centroid      
-        
+		
+		seeds=seedIdentifier(frame_morph);	// Contours/Centroid      
+        sort(seeds);
 
        if(nccomps != nbGraine){	//check if a theres a change in # of seeds in the frame and tell how many there is
 		    cout << "Voici le nombre de graine : " << nccomps-1 << endl;	//remove background, returns number of seed detected
 			nbGraine=nccomps;
         }
-        
+        if ((char)waitKey(1)=='r'){ cout << "Voici ou elle sont :" <<endl << seeds << endl;
+        cout << "Pis combien delements dans mon tableau" << (int)seeds.size() << endl;
+		}
+		
+		
+		
+		
+		
         //-- [show]
-		//imshow("Video Capture",frame);
-		imshow("Centroid Detection",frame_label);
+		imshow("Video Capture",frame);
+		//imshow("Centroid Detection",frame_label);
         //imshow("Object Detection",frame_morph);        
-        //video.write(frame);
-        //video1.write(frame_label);
         nbLoop++;
     }
     clock_gettime(CLOCK_REALTIME, &end);
@@ -151,8 +217,6 @@ int main(int argv, char* argc[])
     imwrite("noise_filtered.jpg",frame_morph); 
     imwrite("gray_scaled.jpg",frame_gray);
     imwrite("original_frame.jpg",frame);  
-    //video.release();
-    //video1.release();
     cap.release();
     return 0;
 }
