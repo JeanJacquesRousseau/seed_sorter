@@ -1,7 +1,7 @@
 Seed sorter Project
 ===============
 Example of current state of the Project 
-```bash 
+0. 	```bash 
 	https://www.youtube.com/watch?v=l2LMlc-uq7o
 	```
 
