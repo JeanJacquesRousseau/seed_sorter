@@ -141,8 +141,8 @@ void sort(vector<Point3f> input)
 		
 			cout << " ya une graine ";
 			char* couleur;
-			if(input[i].z ==2) couleur = "verte ";
-			if(input[i].z ==1 ) couleur = "rouge ";
+			if(input[i].z ==2) couleur = "de mais ";
+			if(input[i].z ==1 ) couleur = "de soya ";
 			
 			
 		
