@@ -34,7 +34,7 @@ class Seed
 		Graine getType();
 		
 		vector<Point3f> identifier(Mat mask);
-		void draw(vector<Point3f> seeds , Mat mask, Mat frame);
+		Mat draw(vector<Point3f> seeds , Mat mask, Mat frame);
 		void sort(vector<Point3f> seeds);
 		void printCount(vector<Point3f> seeds);
 		

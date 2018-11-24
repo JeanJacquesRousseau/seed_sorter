@@ -86,9 +86,9 @@ int main(int argv, char* argc[])
     cap.set(CV_CAP_PROP_FRAME_HEIGHT,HEIGHT);	//768
      
     //! [window]
-    //namedWindow("Video Capture", WINDOW_AUTOSIZE);
+    namedWindow("Video Capture", WINDOW_AUTOSIZE);
     namedWindow("Keyboard Control", WINDOW_AUTOSIZE);
-    //namedWindow("Object Detection", WINDOW_AUTOSIZE);
+    namedWindow("Object Detection", WINDOW_AUTOSIZE);
     
     //! [performance measurement]
 	struct timespec start, end;	// initiate start and ends values of clock
@@ -108,7 +108,7 @@ int main(int argv, char* argc[])
         
 		seeds=seed.identifier(frame_morph);
 		seed.sort(seeds);  			
-		//seed.draw(seeds, frame_morph,frame);
+		frame_label = seed.draw(seeds, frame_morph,frame);
 
 		//seed.printCount(seeds);
 		if(nbGraine != seeds.size()){	//check if a theres a change in # of seeds in the frame and tell how many there is
@@ -122,7 +122,7 @@ int main(int argv, char* argc[])
         //-- [show]
 		//imshow("Video Capture",frame_morph);
 		//imshow("Centroid Detection",frame_label);
-        //imshow("Object Detection",frame_threshold);        
+        //imshow("Object Detection",frame);        
         
         nbLoop++;	/// Loop counter
     }
@@ -130,11 +130,11 @@ int main(int argv, char* argc[])
     double difference = (end.tv_sec -start.tv_sec) + (double)(end.tv_nsec - start.tv_nsec)/1000000000.0;
     cout << "Ca prend " << difference << "secondes pour faire " << nbLoop << " capture dimage et traitement" << endl;
     cout << "Moyenne de : " << nbLoop/difference << " capture&traitement/secondes " << endl; 
-    //imwrite("otsu_thresholding.jpg",frame_threshold);
-    //imwrite("sorted_seeds.jpg",frame_label); 
-    //imwrite("noise_filtered.jpg",frame_morph); 
-    //imwrite("gray_scaled.jpg",frame_gray);
-    //imwrite("original_frame.jpg",frame);  
+    imwrite("/home/pi/seed_sorter/image/otsu_thresholding.jpg",frame_threshold);
+    imwrite("/home/pi/seed_sorter/image/sorted_seeds.jpg",frame_label); 
+    imwrite("/home/pi/seed_sorter/image/noise_filtered.jpg",frame_morph); 
+    imwrite("/home/pi/seed_sorter/image/gray_scaled.jpg",frame_gray);
+    imwrite("/home/pi/seed_sorter/image/original_frame.jpg",frame);  
     cap.release();
     return 0;
 }

@@ -48,7 +48,7 @@ vector<Point3f> Seed::identifier(Mat mask){
 }
 
 
-void Seed::draw(vector<Point3f> seeds , Mat mask, Mat frame){
+Mat Seed::draw(vector<Point3f> seeds , Mat mask, Mat frame){
 
 	vector<cv::Vec3b> colors(nbGraine_);	/// Define a color vector of size # of seeds + background	    
 	colors[0] = cv::Vec3b(0,0,0);	/// background pixels remain black.
@@ -89,6 +89,7 @@ void Seed::draw(vector<Point3f> seeds , Mat mask, Mat frame){
 	rectangle(frame,target_area,Scalar(200,150,25),1,8,0);		///Draw blue rectangle in target area   	
     namedWindow( "Debug Window", WINDOW_AUTOSIZE );
     imshow( "Debug Window", frame);
+    return frame;
 }
 
 
