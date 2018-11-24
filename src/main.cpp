@@ -62,7 +62,7 @@ void keyboardControl(){
 int main(int argv, char* argc[])
 {
     //! [mat]
-    Mat frame, frame_morph, frame_gray, frame_threshold, frame_label;
+    Mat frame, frame_original, frame_morph, frame_gray, frame_threshold, frame_label;
     Mat element = getStructuringElement( MORPH_RECT, Size( 15, 15 ), Point(-1,-1) );// Size(6,6) marche mais on a un probleme avec le glare
 
     Seed seed;
@@ -98,6 +98,8 @@ int main(int argv, char* argc[])
     while((char)waitKey(1)!=27){	// ~26 frames/secs with no algorithm and no show
 
         cap>>frame;
+        frame_original = frame;
+        imwrite("/home/pi/seed_sorter/image/original_frame.jpg",frame_original); 
         if(frame.empty()) break;
         
         //-- Detect the object based on RGB Range Values
@@ -122,7 +124,7 @@ int main(int argv, char* argc[])
         //-- [show]
 		//imshow("Video Capture",frame_morph);
 		//imshow("Centroid Detection",frame_label);
-        //imshow("Object Detection",frame);        
+                
         
         nbLoop++;	/// Loop counter
     }
@@ -134,7 +136,7 @@ int main(int argv, char* argc[])
     imwrite("/home/pi/seed_sorter/image/sorted_seeds.jpg",frame_label); 
     imwrite("/home/pi/seed_sorter/image/noise_filtered.jpg",frame_morph); 
     imwrite("/home/pi/seed_sorter/image/gray_scaled.jpg",frame_gray);
-    imwrite("/home/pi/seed_sorter/image/original_frame.jpg",frame);  
+    //imwrite("/home/pi/seed_sorter/image/original_frame.jpg",frame_original);  
     cap.release();
     return 0;
 }
