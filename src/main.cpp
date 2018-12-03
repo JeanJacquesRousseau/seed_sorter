@@ -110,13 +110,13 @@ int main(int argv, char* argc[])
           
 
 		//! Background extraction
-        cvtColor( frame, frame_gray, COLOR_BGR2GRAY );	//Grey scale convertion
-        threshold(frame_gray, frame_threshold, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);  //Otsu thresholding
-        morphologyEx(frame_threshold, frame_morph, MORPH_OPEN , element);	// Noise filter
+        //cvtColor( frame, frame_gray, COLOR_BGR2GRAY );	//Grey scale convertion
+        //threshold(frame_gray, frame_threshold, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);  //Otsu thresholding
+        //morphologyEx(frame_threshold, frame_morph, MORPH_OPEN , element);	// Noise filter
         
-	seeds=seed.identifier(frame_morph);	// Input a masked image where backgrounds has been extracted and output vector of floats with element (centroid_x, centroid_y, type)
+	//seeds=seed.identifier(frame_morph);	// Input a masked image where backgrounds has been extracted and output vector of floats with element (centroid_x, centroid_y, type)
 	//seed.sort(seeds);  // Takes in vector of seeds and do motor control to sort
-	frame_label = seed.draw(seeds, frame_morph,frame);	// TODO : Issue with drawing random centroids points on side of screen
+	//frame_label = seed.draw(seeds, frame_morph,frame);	// TODO : Issue with drawing random centroids points on side of screen
 	//seed.printCount(seeds);	// TODO : work to be done here.
 	/*	
 	if(nbGraine != seeds.size()){	//check if a theres a change in # of seeds in the frame and tell how many there is
@@ -126,10 +126,10 @@ int main(int argv, char* argc[])
 	*/
 		
 	keyboardControl();
-	imshow("Centroid Detection",frame_label);
+	imshow("Centroid Detection",frame_original);
 		
         //! [show]
-	imshow("Video Capture",frame_morph);
+	//imshow("Video Capture",frame_morph);
 	  
         nbLoop++;	/// Loop counter
     }
@@ -141,10 +141,10 @@ int main(int argv, char* argc[])
     cout << "Moyenne de : " << nbLoop/difference << " capture&traitement/secondes " << endl; 
     
     //! [Write Results]
-    imwrite("/home/pi/seed_sorter/image/otsu_thresholding.jpg",frame_threshold);
-    imwrite("/home/pi/seed_sorter/image/sorted_seeds.jpg",frame_label); 
-    imwrite("/home/pi/seed_sorter/image/noise_filtered.jpg",frame_morph); 
-    imwrite("/home/pi/seed_sorter/image/gray_scaled.jpg",frame_gray);
+    //imwrite("/home/pi/seed_sorter/image/otsu_thresholding.jpg",frame_threshold);
+    //imwrite("/home/pi/seed_sorter/image/sorted_seeds.jpg",frame_label); 
+    //imwrite("/home/pi/seed_sorter/image/noise_filtered.jpg",frame_morph); 
+    //imwrite("/home/pi/seed_sorter/image/gray_scaled.jpg",frame_gray);
     imwrite("/home/pi/seed_sorter/image/original_frame.jpg",frame_original);  
     
     //cap.release();
