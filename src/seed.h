@@ -12,7 +12,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <wiringPi.h>
-#include <softPwm.h>
+//#include <softPwm.h>
+#include <softServo.h>
 
 using namespace std;
 using namespace cv;
@@ -41,6 +42,8 @@ class Seed
 		
 	protected:
 	private:
+		bool armed_;
+		uint32_t timer_;
 		float center_x;
 		float center_y;
 		Graine sorte_;

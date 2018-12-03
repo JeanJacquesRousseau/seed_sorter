@@ -7,7 +7,7 @@
 #include "seed.h"
 
 //default constructor
-Seed::Seed() : center_x(0), center_y(0), sorte_(NOT_IDENTIFIED){}
+Seed::Seed() : center_x(0), center_y(0), sorte_(NOT_IDENTIFIED), armed_(false) {}
 
 Seed::~Seed(){}
 
@@ -31,13 +31,17 @@ vector<Point3f> Seed::identifier(Mat mask){
 		graines[i-1].x = (float)centroids_.at<double>(i,0);	// element i=0 of centroids is backgrounds centroids
 		graines[i-1].y = (float)centroids_.at<double>(i,1);
 	
-		if( stats_.at<int>(i, cv::CC_STAT_AREA) < 1250 ) {	// element i = 0 area is backgrounds area
+		if( stats_.at<int>(i, cv::CC_STAT_AREA) < 1240 ) {	// element i = 0 area is backgrounds area	AREA = 1250 for 800X600 Res
 			//colors[i] = cv::Vec3b(0,0,255);	///Soybeans in red
 			graines[i-1].z = 1;
 		}
-		else {
+		else if( stats_.at<int>(i, cv::CC_STAT_AREA) > 1240 ) { //&& stats_.at<int>(i, cv::CC_STAT_AREA) < 2050
 			//colors[i] = cv::Vec3b(0,255,0);	///Corn in green
 			graines[i-1].z = 2;
+		}
+		else {
+			//color[i] = cv::Vec3b(0,165,255);
+			graines[i-1].z =3;
 		}
 		
 	}
@@ -56,7 +60,8 @@ Mat Seed::draw(vector<Point3f> seeds , Mat mask, Mat frame){
 	for(int i =1; i <=(int)seeds.size() ;i++){	/// Assign red to soybean(1) and green to corn(2) 
 			
 			if(seeds[i-1].z ==1) colors[i] = cv::Vec3b(0,0,255);
-			else if(seeds[i-1].z ==2)colors[i] = cv::Vec3b(0,255,0);	
+			else if(seeds[i-1].z ==2)colors[i]= cv::Vec3b(0,255,0);
+			//else if(seeds[i-1].z == 3) //colors[i] = cv::Vec3b(0,165,255);	
 		
 	}
 	
@@ -75,7 +80,8 @@ Mat Seed::draw(vector<Point3f> seeds , Mat mask, Mat frame){
 			int label = labels_.at<int>(y, x);	
 			CV_Assert(0 <= label && label <= nbGraine_);		///Run time check
 			//drawing.at<cv::Vec3b>(y, x) = colors[label];	///Write colors to coresponding seed on drawing frame
-			if(label != 0) 	frame.at<cv::Vec3b>(y, x) = colors[label];	///Write colors to coresponding seed on drawing frame
+			//if(label != 0) 	
+			frame.at<cv::Vec3b>(y, x) = colors[label];	///Write colors to coresponding seed on drawing frame
 	}
 	
 	
@@ -85,29 +91,42 @@ Mat Seed::draw(vector<Point3f> seeds , Mat mask, Mat frame){
     }
     
     
-	Rect target_area = Rect(0,200, 250,200);
-	rectangle(frame,target_area,Scalar(200,150,25),1,8,0);		///Draw blue rectangle in target area   	
-    namedWindow( "Debug Window", WINDOW_AUTOSIZE );
-    imshow( "Debug Window", frame);
+	//Rect target_area = Rect(100, 200, 200,200);
+	//rectangle(frame,target_area,Scalar(200,150,25),1,8,0);		///Draw blue rectangle in target area   	
+	//putText(frame, "pute",Point2f(0,0), FONT_HERSHEY_PLAIN,2, Scalar(0,0,255),2,8,false);
+    //namedWindow( "Debug Window", WINDOW_AUTOSIZE );
+    //imshow( "Debug Window", frame);
     return frame;
 }
 
 
 void Seed::sort(vector<Point3f> seeds){
-
-	for (uint32_t i = 0; i <nbGraine_ -1;i++)
-	{
-		if( (seeds[i].x >=0 && seeds[i].x <= 250) && (seeds[i].y >= 200 && seeds[i].y <= 400) ){		
+	
+	if(armed_){
+		for (uint32_t i = 0; i <nbGraine_ -1;i++)
+		{
+			if( (seeds[i].x >=100 && seeds[i].x <= 300) && (seeds[i].y >= 200 && seeds[i].y <= 400) ){		
+				
+				//cout << " ya une graine ";
+				//char* couleur;
+				//if(seeds[i].z ==1) system("echo 0=60 > /dev/servoblaster");
+				if(seeds[i].z ==2 ){
+					timer_ = millis();
+					system("echo 0=60 > /dev/servoblaster");
+					cout<< "Tri en cours" << endl;		
+					armed_ = false;
+					//break;
+				}//cout << couleur << "dans slot" << endl;
+			}
+			//else system("echo 0=60 > /dev/servoblaster");
 			
-			cout << " ya une graine ";
-			char* couleur;
-			if(seeds[i].z ==2) couleur = "de mais ";
-			if(seeds[i].z ==1 ) couleur = "de soya ";		
-			cout << couleur << "dans slot" << endl;
 		}
-		
 	}
-
+	
+	if(millis() - timer_ >1200 && armed_ == false) {
+		armed_ =true;
+		system("echo 0=120 > /dev/servoblaster");
+	}
 }
 
 void Seed::printCount(vector<Point3f> seeds){
