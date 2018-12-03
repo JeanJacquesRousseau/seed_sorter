@@ -105,7 +105,7 @@ int main(int argv, char* argc[])
 
         cap>>frame;         
         if(frame.empty()) break;
-	//imshow("Centroid Detection",frame);
+	imshow("Centroid Detection",frame);
 	
           
 
