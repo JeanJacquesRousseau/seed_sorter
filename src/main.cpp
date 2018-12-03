@@ -145,7 +145,7 @@ int main(int argv, char* argc[])
     //imwrite("/home/pi/seed_sorter/image/sorted_seeds.jpg",frame_label); 
     //imwrite("/home/pi/seed_sorter/image/noise_filtered.jpg",frame_morph); 
     //imwrite("/home/pi/seed_sorter/image/gray_scaled.jpg",frame_gray);
-    imwrite("/home/pi/seed_sorter/image/original_frame.jpg",frame_original);  
+    imwrite("/home/pi/seed_sorter/image/original_frame1.jpg",frame_original);  
     
     //cap.release();
     return 0;
