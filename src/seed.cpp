@@ -91,7 +91,7 @@ Mat Seed::draw(vector<Point3f> seeds , Mat mask, Mat frame){
     
     
 	Rect target_area = Rect(100, 200, 200,200);
-	rectangle(frame,target_area,Scalar(200,150,25),1,8,0);		///Draw blue rectangle in target area   	
+	rectangle(frame,target_area,Scalar(200,150,25),2.3,8,0);		///Draw blue rectangle in target area   	
 	//putText(frame, "pute",Point2f(0,0), FONT_HERSHEY_PLAIN,2, Scalar(0,0,255),2,8,false);
     //namedWindow( "Debug Window", WINDOW_AUTOSIZE );
     //imshow( "Debug Window", frame);
