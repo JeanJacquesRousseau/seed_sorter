@@ -16,7 +16,7 @@ To compile this project, you need openCV-3.2 for raspberry pi 3
 	```
 in terminal. Then Build >> Set Build Commands.
 
-Build : g++ -Wall -o "%e" "%f" $(pkg-config --libs --cflags opencv)
+Build : g++ -Wall -o "%e" "%f" -lwiringPi -lpthread $(pkg-config --libs --cflags opencv) $(pkg-config --libs --cflags harfbuzz)
 
 3. clone my git and you are ready to compile!
 
