@@ -31,11 +31,11 @@ vector<Point3f> Seed::identifier(Mat mask){
 		graines[i-1].x = (float)centroids_.at<double>(i,0);	// element i=0 of centroids is backgrounds centroids
 		graines[i-1].y = (float)centroids_.at<double>(i,1);
 	
-		if( stats_.at<int>(i, cv::CC_STAT_AREA) < 650 ) {	// element i = 0 area is backgrounds area	AREA = 1250 for 800X600 Res
+		if( stats_.at<int>(i, cv::CC_STAT_AREA) < 650 ) {//650 is old area	// element i = 0 area is backgrounds area	AREA = 1250 for 800X600 Res
 			//colors[i] = cv::Vec3b(0,0,255);	///Soybeans in red
 			graines[i-1].z = 1;
 		}
-		else if( stats_.at<int>(i, cv::CC_STAT_AREA) > 650 ) { //&& stats_.at<int>(i, cv::CC_STAT_AREA) < 2250
+		else if( stats_.at<int>(i, cv::CC_STAT_AREA) > 650 ) {//650 is old area //&& stats_.at<int>(i, cv::CC_STAT_AREA) < 2250
 			//colors[i] = cv::Vec3b(0,255,0);	///Corn in green
 			graines[i-1].z = 2;
 		}
