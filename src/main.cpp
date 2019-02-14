@@ -114,13 +114,7 @@ int main(int argv, char* argc[]){
 
     Seed seed;
     Mat watershed;
-    Mat eclatee = imread(argc[1]);
-
-
-    // Ensure that it was found and that we can use it
-
-
-
+    //Mat eclatee = imread(argc[1]);
 
     /*
     seed.setCenter(2,4);
@@ -152,7 +146,6 @@ int main(int argv, char* argc[]){
     namedWindow("Keyboard Control", WINDOW_AUTOSIZE);
    // namedWindow("Object Detection", WINDOW_AUTOSIZE);
 
-   system("sudo /home/pi/servoblaster/PiBits/ServoBlaster/user/servod");
 
     //! [performance measurement]
 	struct timespec start, end;	// initiate start and ends values of clock
@@ -161,23 +154,23 @@ int main(int argv, char* argc[]){
 
     while((char)choix != 27){	// ~26 frames/secs with no algorithm and no show
 
-        if(modeAuto){
             cap>>frame;
+	    frame.copyTo(frame_original);
             if(frame.empty())
 		{
 		    cout << " sa marche pas" << endl;
 	            break;
 	        }
-	    imshow("Keyboard Control",frame);
+	    //imshow("Keyboard Control",frame);
 
           //! Background extraction
 	    cvtColor( frame, frame_gray, COLOR_BGR2GRAY );	//Grey scale convertion
 	    threshold(frame_gray, frame_threshold, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);  //Otsu thresholding
 	    morphologyEx(frame_threshold, frame_morph, MORPH_OPEN , element);	// Noise filter
-	    frame.copyTo(watershed, frame_morph);
+	    //frame.copyTo(watershed, frame_morph);
 	    //watershed = bitwise_and(frame,frame,frame_morph);
-	    imshow("mask", watershed);
-	    seeds=seed.identifier(eclatee);	// Input a masked image where backgrounds has been extracted and output vector of floats with element (centroid_x, centroid_y, type)
+	    //imshow("mask", watershed);
+	    seeds=seed.identifier(frame_morph);	// Input a masked image where backgrounds has been extracted and output vector of floats with element (centroid_x, centroid_y, type)
 	    //seed.sort(seeds);  // Takes in vector of seeds and do motor control to sort
 	    frame_label = seed.draw(seeds, frame_morph,frame);	// TODO : Issue with drawing random centroids points on side of screen
 	    //seed.printCount(seeds);	// TODO : work to be done here.
@@ -189,66 +182,24 @@ int main(int argv, char* argc[]){
 
 
 
-	         imshow("Centroid Detection",frame_label);
+	         //imshow("Centroid Detection",frame_label);
 	         nbLoop++;	/// Loop counter
 
-    }else
-    {
 
-	usleep(1000);
-	JoystickEvent event;
-	if (joystick.sample(&event)){
-	    if (event.isButton()){
-		printf("Button %u is %s\n",
-		event.number,
-		event.value == 0 ? "up" : "down");
-	    }
-	    else if (event.isAxis()){
-	    //printf("Axis %u is at position %d\n", event.number, event.value);
-		if(event.number ==2){
-		    servoCommand = maper(event.value,-32767,32767,-2,2);
-		    servoCommand = servoCommand*(-1);
-
-		}
-
-		if(servoInput>59 && servoInput <201) servoInput += servoCommand;
-
-		if(servoInput > 200) servoInput = 200;
-		if(servoInput < 60) servoInput =60;
-		//cout << "servo Command : " << servoInput << endl;
-		string joystickIN = to_string(servoInput);
-		const char* pchar = joystickIN.c_str();
-
-		char buffer[256]; // <- danger, only storage for 256 characters.
-
-
-
-
-		char* motor = "echo P1-12=";// +" > /dev/servoblaster";
-		strncpy(buffer, motor, sizeof(buffer));
-		strncat(buffer, pchar, sizeof(buffer));
-
-
-		char* echo = " > /dev/servoblaster";
-		strncat(buffer, echo, sizeof(buffer));
-		cout << "motor : " << buffer << endl;
-		if(millis() - motorUpdate > 100){
-		    motorUpdate = millis();
-		    system(buffer);
-		}
-		//cout << echo << endl;
-
-	    }
+	if(nbLoop%15 == 0) {
+	    //Vec3b pixel= ;
+	    //cout << (int)frame_original.at<Vec3b>(4,4).val[0] << endl;
 	}
 
-
-
-    }
-
-
-
         //! [show]
-	//imshow("Video Capture",frame_morph);
+	//imshow("yo el gros", frame_morph);
+	//imshow("Video Capture",frame_original);
+	//frame_original.copyTo(frame,frame_morph);
+	//Mat mask;
+	//frame_morph.convertTo(mask,CV_8UC1);
+	frame_original.copyTo(frame_morph,frame_morph);
+	imshow("mask",frame_morph);
+	imshow("og",frame_original);
 
         //cout << "mode Auto : " << modeAuto << endl;
 	choix = waitKey(1);
@@ -267,9 +218,9 @@ int main(int argv, char* argc[]){
     //! [Write Results]
     //imwrite("/home/pi/seed_sorter/image/otsu_thresholding.jpg",frame_threshold);
     //imwrite("/home/pi/seed_sorter/image/identified_seeds.jpg",frame_label);
-    imwrite("/home/pi/seed_sorter/test/watershedEXP2.jpg",watershed);
-    //imwrite("/home/pi/seed_sorter/image/gray_scaled.jpg",frame_gray);
-    imwrite("/home/pi/seed_sorter/image/watershed.jpg",frame);
+    //imwrite("/home/pi/seed_sorter/test/watershedEXP2.jpg",watershed);
+    //imwrite("/home/pi/seed_sorter/image/grain_avec_tube.jpg",frame_original);
+    imwrite("/home/pi/seed_sorter/image/CornWithMask.jpg",frame_morph);
 
 
     cap.release();

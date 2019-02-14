@@ -2,6 +2,7 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include "seed.cpp"
+#include "joystick.hh"
 using namespace std;
 using namespace cv;
 int main(int, char** argv)
@@ -54,7 +55,7 @@ int main(int, char** argv)
     // Create binary image from source image
     Mat bw;
     cvtColor(src, bw, CV_BGR2GRAY);
-    threshold(bw, bw, 40, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+    threshold(bw, bw, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
     imshow("Binary Image", bw);
     // Perform the distance transform algorithm
     Mat dist;
@@ -69,13 +70,14 @@ int main(int, char** argv)
     // Dilate a bit the dist image
     Mat kernel1 = Mat::ones(3, 3, CV_8UC1);
     dilate(dist, dist, kernel1);
-    imshow("Peaks", dist);
+    
     
     // Create the CV_8U version of the distance image
     // It is needed for findContours()
     Mat dist_8u;
     dist.convertTo(dist_8u, CV_8U);
-    seeds = seed.identifier(dist_8u);
+    imshow("Peaks", dist_8u);
+    seeds = seed.identifier(dist_8u); //dist_8u
     // Find total markers
     vector<vector<Point> > contours;
     findContours(dist_8u, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
