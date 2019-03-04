@@ -30,12 +30,13 @@ int servoCommand =0;
 int servoInput = 130;
 int motorUpdate = 200;
 
+
 //PS3 Controller
 Joystick joystick("/dev/input/js0");
 
 //Screen Resolution
-#define HEIGHT	600//768
-#define WIDTH	800//1024
+#define HEIGHT	600 //600
+#define WIDTH	800 //800
 
 //Vector of seeds containing x,y positions and seed type
 vector<Point3f> seeds;
@@ -176,30 +177,29 @@ int main(int argv, char* argc[]){
 	    //seed.printCount(seeds);	// TODO : work to be done here.
 	
 	    if(nbGraine != seeds.size()){	//check if a theres a change in # of seeds in the frame and tell how many there is
-		    //cout << "Voici le nombre de graine : " << seeds.size() << endl;	//remove background, returns number of seed detected
-		    //nbGraine= seeds.size();
+		    cout << "Voici le nombre de graine : " << seeds.size() << endl;	//remove background, returns number of seed detected
+		    nbGraine= seeds.size();
 	    }
 
 
 
-	         //imshow("Centroid Detection",frame_label);
-	         nbLoop++;	/// Loop counter
+	
+	    nbLoop++;	/// Loop counter
 
 
-	if(nbLoop%15 == 0) {
-	    //Vec3b pixel= ;
-	    //cout << (int)frame_original.at<Vec3b>(4,4).val[0] << endl;
-	}
+
+	//cout << (int)frame_original.at<Vec3b>(4,4).val[0] << endl; // Pour acceder a une valeur RGB d'un Pixel
+
 
         //! [show]
 	//imshow("yo el gros", frame_morph);
-	//imshow("Video Capture",frame_original);
+	imshow("Video Capture",frame_label);
 	//frame_original.copyTo(frame,frame_morph);
 	//Mat mask;
 	//frame_morph.convertTo(mask,CV_8UC1);
-	frame_original.copyTo(frame_morph,frame_morph);
-	imshow("mask",frame_morph);
-	imshow("og",frame_original);
+	//frame_original.copyTo(frame_morph,frame_morph);
+	//imshow("mask",frame_morph);
+	//imshow("og",frame_label);
 
         //cout << "mode Auto : " << modeAuto << endl;
 	choix = waitKey(1);
@@ -220,7 +220,7 @@ int main(int argv, char* argc[]){
     //imwrite("/home/pi/seed_sorter/image/identified_seeds.jpg",frame_label);
     //imwrite("/home/pi/seed_sorter/test/watershedEXP2.jpg",watershed);
     //imwrite("/home/pi/seed_sorter/image/grain_avec_tube.jpg",frame_original);
-    imwrite("/home/pi/seed_sorter/image/CornWithMask.jpg",frame_morph);
+    //imwrite("/home/pi/seed_sorter/image/CornWithMask.jpg",frame_morph);
 
 
     cap.release();
