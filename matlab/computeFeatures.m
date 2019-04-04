@@ -37,8 +37,22 @@ if imCC.NumObjects >= 1
             x = max(x - padding, 1);
             bb(3) = bb(3) + 2*padding;
         end
-        subI = im(y:(y+bb(4)), x:(x+bb(3)), :);
-        subL = labels(y:(y+bb(4)), x:(x+bb(3)));
+		
+		% Modification pour respecter taille des matrices
+		
+		pixelY = y+bb(4);
+		pixelX = x+bb(3);
+		
+		if pixelY < 600
+			pixelY = 600;
+		end
+		
+		if pixelX < 800
+			pixelX = 600;
+		end
+		
+        subI = im(y:(pixelY), x:(pixelX), :);
+        subL = labels(y:(pixelY), x:(pixelX));
         mask = subL == i;
         mask(:,:,2) = mask(:,:,1);
         mask(:,:,3) = mask(:,:,1);

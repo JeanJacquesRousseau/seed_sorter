@@ -62,9 +62,61 @@ data = [cornVecs', zeros(size(cornVecs,2), 1); soyVecs', ones(size(soyVecs,2), 1
 %% Training
 trainedModel = trainClassifierTest(data);
 
+%% While loop to take pictures
+clear('cam');
+cam = webcam(1);
+cam.Resolution = '800X600';
+load('trainedModelLinearSVM')
+
+image = snapshot(cam)
+imwrite(image, 'testwebcam.jpg')
+%% 
+while true
+mixed = snapshot(cam);
+mixedT = imbinarize(rgb2gray(mixed),graythresh(rgb2gray(mixed)));
+mixedT = bwareaopen(mixedT, 300);
+% imshow(mixedT)
+% mixedS = mixed;
+% 
+% mask = cat(3, mixedT, mixedT, mixedT);
+% mixedS(mask == 0) = 0;
+% imshow(mixedS)
+
+vecs = computeFeatures(mixed, mixedT, sideLength);
+
+imCC = bwconncomp(mixedT);
+centroids = regionprops(imCC, 'Centroid');
+labels = labelmatrix(imCC);
+
+fit = trainedModel.predictFcn(vecs');
+
+% results = label2rgb(labels);
+
+texts = cell(imCC.NumObjects,1);
+positions = zeros(imCC.NumObjects, 2);
+
+for i = 1:imCC.NumObjects
+    c = centroids(i).Centroid;
+    c = round(c);
+    if fit(i) == 0
+        texts{i} = 'Corn';
+    else
+        texts{i} = 'Soy';
+    end
+    positions(i,:) = c;
+end
+
+results = insertText(label2rgb(labels), positions, texts);
+imshow(results);
+% imwrite(results, 'results.jpg')
+end
+
+
+
+
 %% Validate
 load('trainedModelLinearSVM')
-mixed = imread('mix1.jpg');
+mixed = imread('testwebcam.jpg');
 mixedT = imbinarize(rgb2gray(mixed),graythresh(rgb2gray(mixed)));
 mixedT = bwareaopen(mixedT, 300);
 % imshow(mixedT)
